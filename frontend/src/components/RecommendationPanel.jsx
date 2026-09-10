@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { decisionAPI } from '../api'
+import { ExplanationCard } from './ExplanationCard'
 
 export function RecommendationPanel({ decisionStatement }) {
   const [recommendations, setRecommendations] = useState(null)
@@ -7,7 +8,7 @@ export function RecommendationPanel({ decisionStatement }) {
   const [error, setError] = useState(null)
 
   const handleGetRecommendations = async () => {
-    if (!decisionStatement || decisionStatement.trim().length < 10) {
+    if (!decisionStatement || decisionStatement.trim().length < 3) {
       setError('Please enter a decision statement first')
       return
     }
@@ -33,121 +34,82 @@ export function RecommendationPanel({ decisionStatement }) {
   }
 
   return (
-    <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="font-semibold text-blue-900">🔍 AI Recommendations</h3>
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-indigo-200 rounded-xl p-5 space-y-4 shadow-sm">
+      <div className="flex flex-wrap justify-between items-center gap-2">
+        <div>
+          <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded">
+            Feature 8: Explanation-First
+          </span>
+          <h3 className="font-bold text-indigo-950 text-base mt-1">
+            🔍 AI Smart Recommendations & Collective Memory
+          </h3>
+        </div>
         <button
           onClick={handleGetRecommendations}
           disabled={loading}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm font-semibold"
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-bold text-xs shadow disabled:opacity-50"
         >
-          {loading ? 'Analyzing...' : 'Get Recommendations'}
+          {loading ? 'Consulting Brain...' : 'Recall Past Precedents ⚡'}
         </button>
       </div>
 
       {error && (
-        <div className="p-3 bg-red-100 border border-red-300 rounded text-red-700 text-sm">
+        <div className="p-3 bg-red-100 border border-red-300 rounded-lg text-red-700 text-xs">
           {error}
         </div>
       )}
 
       {recommendations && (
         <div className="space-y-4">
-          <div className="bg-white p-3 rounded border-l-4 border-green-500">
-            <p className="text-sm font-semibold text-gray-900 mb-2">
-              💡 Recommendation
-            </p>
-            <p className="text-sm text-gray-700 mb-2">
-              {recommendations.recommendation}
-            </p>
-            <div className="flex items-center gap-2">
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-green-500 h-2 rounded-full"
-                  style={{
-                    width: `${recommendations.confidence * 100}%`,
-                  }}
-                ></div>
-              </div>
-              <span className="text-xs font-semibold text-gray-600">
-                {(recommendations.confidence * 100).toFixed(0)}%
-              </span>
-            </div>
-          </div>
-
-          {recommendations.insights && recommendations.insights.length > 0 && (
-            <div className="bg-white p-3 rounded">
-              <p className="text-sm font-semibold text-gray-900 mb-2">
-                📊 Insights
-              </p>
-              <ul className="space-y-1">
-                {recommendations.insights.map((insight, i) => (
-                  <li key={i} className="text-sm text-gray-700">
-                    • {insight}
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {/* Explanation-First Card */}
+          {recommendations.explanation && (
+            <ExplanationCard
+              explanation={recommendations.explanation}
+              confidenceScore={recommendations.confidence_score || Math.round((recommendations.confidence || 0.9) * 100)}
+              recommendation={recommendations.recommendation}
+            />
           )}
 
-          {recommendations.warnings && recommendations.warnings.length > 0 && (
-            <div className="bg-yellow-50 p-3 rounded border-l-4 border-yellow-500">
-              <p className="text-sm font-semibold text-yellow-900 mb-2">
-                ⚠️ Warnings
-              </p>
-              <ul className="space-y-1">
-                {recommendations.warnings.map((warning, i) => (
-                  <li key={i} className="text-sm text-yellow-700">
-                    • {warning}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {recommendations.lessons && recommendations.lessons.length > 0 && (
-            <div className="bg-purple-50 p-3 rounded">
-              <p className="text-sm font-semibold text-purple-900 mb-2">
-                🎓 Lessons from Past
-              </p>
-              <ul className="space-y-1">
-                {recommendations.lessons.map((lesson, i) => (
-                  <li key={i} className="text-sm text-purple-700">
-                    • {lesson}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {recommendations.all_similar &&
-            recommendations.all_similar.length > 0 && (
-              <div className="bg-white p-3 rounded">
-                <p className="text-sm font-semibold text-gray-900 mb-2">
-                  📚 Similar Decisions ({recommendations.all_similar.length})
-                </p>
-                <div className="space-y-2">
-                  {recommendations.all_similar.map((similar, i) => (
-                    <div
-                      key={i}
-                      className="text-xs bg-gray-50 p-2 rounded border-l-2 border-blue-300"
-                    >
-                      <p className="font-semibold text-gray-900">
-                        {similar.title}
-                      </p>
-                      <p className="text-gray-600 mt-1">
-                        Similarity: {(similar.similarity_score * 100).toFixed(0)}%
-                      </p>
-                      {similar.actual_outcome && (
-                        <p className="text-green-700 mt-1 italic">
-                          Result: {similar.actual_outcome}
-                        </p>
-                      )}
+          {/* Similar Past Decisions with Temporal Indicators */}
+          {recommendations.all_similar?.length > 0 && (
+            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+              <h4 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-3">
+                Recalled Past Precedents ({recommendations.all_similar.length}):
+              </h4>
+              <div className="space-y-2">
+                {recommendations.all_similar.map((d, i) => (
+                  <div
+                    key={i}
+                    className={`p-3 rounded-lg border text-xs ${
+                      d.is_expired
+                        ? 'border-amber-300 bg-amber-50/50'
+                        : 'border-gray-200 bg-gray-50/70'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-bold text-gray-900">{d.title}</span>
+                      <div className="flex items-center space-x-1">
+                        {d.is_expired && (
+                          <span className="bg-red-100 text-red-700 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                            Expired 2y ago
+                          </span>
+                        )}
+                        <span className="font-mono text-indigo-700 font-semibold bg-indigo-50 px-2 py-0.5 rounded">
+                          Sim: {(d.similarity_score * 100).toFixed(0)}%
+                        </span>
+                      </div>
                     </div>
-                  ))}
-                </div>
+                    <p className="text-gray-600 line-clamp-2">{d.decision_statement}</p>
+                    {d.actual_outcome && (
+                      <div className="mt-1 text-emerald-700 font-medium">
+                        ✓ Actual Outcome: {d.actual_outcome}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -1,204 +1,117 @@
 # AI Organizational Memory & Decision Intelligence Platform
 
-## 📋 Problem Statement
-Organizations make hundreds of decisions daily across HR, Finance, Procurement, Operations, and Sales, spread across meetings, emails, chats, and reports. Once a decision is made, its reasoning is rarely captured anywhere structured. Employees leave, managers change, and documents become hard to find. As a result, teams unknowingly repeat the same mistakes—causing lost time, repeated errors, and accumulated organizational forgetfulness.
+> **A living organizational brain that captures how decisions are actually made, stores the reasoning behind them, and uses this memory to guide employees, prevent repeated mistakes, and continuously improve decision quality.**
 
-### Pain Points
-- Decision history scattered across meetings, emails, and documents
-- When people leave, decision reasoning is lost
-- Teams repeat past mistakes without knowing
-- Current tools (Copilot, Notion, Confluence, Jira) store documents but don't understand or learn from decisions
+In simple words: It's not a wiki. It's not a chatbot. It's the organization's collective judgment made permanent, searchable, and actionable.
 
-## 🚀 Solution
-**AI Organizational Memory & Decision Intelligence Platform** - An AI-powered enterprise brain that:
-1. **Captures decisions** automatically from meeting transcripts, emails, and reports
-2. **Extracts reasoning** - decision, reason, people involved, risks, and expected outcomes
-3. **Builds a Decision Knowledge Graph** - connects decisions to projects, departments, employees, and real outcomes
-4. **Recommends smarter choices** - when facing similar situations, recalls past decisions and explains what actually happened
-5. **Tracks organizational learning** - measures how well the company documents, reuses, and learns from decisions
+---
 
-## 🎯 Core Features
+## 🔹 12 Unique Core Features
 
-### 1. AI Decision Extraction
-- Auto-captures decisions from unstructured data (meetings, emails, reports)
-- Extracts: Decision, Reasoning, People Involved, Risks, Expected Outcome
+| # | Feature | What It Solves | Key Benefit |
+|---|---------|----------------|-------------|
+| 1 | **Decision Memory** | Systems only store outcomes, not reasoning | Full context: triggers, constraints, alternatives, assumptions & evidence |
+| 2 | **Temporal Validity** | Outdated knowledge misleads new employees | Knowledge expires; confidence decays over time; active outdated warnings |
+| 3 | **Dead Ends Repository** | Repeating costly failed experiments | Captures failures, root causes, costs (₹), and "Do NOT retry" guardrails |
+| 4 | **Neuro-Symbolic Reasoning** | LLM hallucinations & lack of explainability | Neural (language) + Symbolic (logic engine) producing verified proof trees |
+| 5 | **Real-Time Guardrails** | Mistakes happen before anyone notices | Proactive intercept before sending; policy counter-offers and escalations |
+| 6 | **Decision Replay** | Post-mortems cannot reconstruct initial assumptions | Time-travel replay: Day 0 assumptions vs reality timeline divergence |
+| 7 | **Multi-Agent Simulation** | Senior leaders and experts unavailable | Virtual Expert Council (Digital twins of Sarah, Raj, Priya) debating proposals |
+| 8 | **Explanation-First Architecture** | Users distrust black-box AI | 5 layers: Source, Deductive Chain, Confidence, Counterfactuals & Evidence |
+| 9 | **Adaptive Learning** | System never improves from outcomes | Feedback loops: 100% on-time outcome boosts pattern confidence (82% ➔ 94%) |
+| 10 | **Dream Mode** | Memory rots and becomes stale | Nightly background consolidation: detects contradictions, prunes old data, finds gaps |
+| 11 | **Governance-First Execution** | Unchecked AI autonomy and liability | 3-tier trust, monetary authority gates (<₹10L, ₹10-50L, >₹50L), immutable audit trail |
+| 12 | **Cross-Dept Connections** | Siloed decisions cause conflicting promises | Links Sales, Supply Chain, Finance & Ops; detects resource & margin clashes |
 
-### 2. Decision Knowledge Graph
-- Neo4j-powered graph connecting decisions to:
-  - Projects & initiatives
-  - Departments & teams
-  - Employees & roles
-  - Real outcomes & results
-- Turns scattered documents into structured organizational memory
+---
 
-### 3. AI Recommendation Engine
-- When facing a similar situation, instantly surfaces relevant past decisions
-- Explains actual outcomes vs. expected results
-- Recommends safer course of action based on organizational experience
+## 🎯 How It All Works Together: Priya's Procurement Journey
 
-### 4. Organizational Learning Score
-- Tracks how well the company documents decisions
-- Measures reuse and learning from outcomes
-- Encourages teams to build institutional knowledge instead of losing it
+1. **Priya joins as a new procurement manager** ➔ Opens the platform and sees pending supplier decisions.
+2. **System recommends Supplier B with 92% confidence** ➔ Evaluated against 47 historical Q3 decisions.
+3. **Priya asks: *"Why not Supplier A?"*** ➔ Natural language intent parsed by the Neuro-Symbolic engine.
+4. **System explains reasoning & dead ends** ➔ Supplier A had 3 monsoon delivery failures in 5 years; Supplier C is a recorded Dead End (40% defect rate, ₹25 Lakhs loss).
+5. **Priya clicks *"Show Replay"*** ➔ Post-mortem timeline reconstructs the 2021 failure and Project Phoenix lessons.
+6. **Temporal Validity warning fires** ➔ System warns that 2018 recommendations for Supplier A expired 2 years ago.
+7. **Priya approves Supplier B** ➔ Full decision journey (triggers, constraints, rejected options) is permanently captured.
+8. **Dream Mode consolidates overnight** ➔ Background process creates a high-reliability heuristic for Supplier B and prunes stale records.
+9. **Six months later, outcome tracked** ➔ Delivery completed with zero defects; adaptive learning boosts Supplier B confidence to 94%.
+10. **Preserved Collective Memory** ➔ Two years later, the next manager immediately inherits Priya's verified institutional wisdom.
 
-## 📊 Use Case Example
-**Scenario**: New supply chain manager faces rising logistics costs, digs through old supplier files, discovers fragments that Supplier A was dropped for Supplier B in 2024, but doesn't know why or what happened.
-
-**With Platform**: Asks "Should we change suppliers to cut cost?" Platform recalls: "Similar decision in 2024. Cost dropped only 3%, while delivery delays and complaints rose." Manager renegotiates with current supplier instead, saving weeks of rework and avoiding a repeated mistake backed by company's own experience.
+---
 
 ## 🔧 Technology Stack
 
-### Frontend
-- **React.js** - component-based UI
-- **Tailwind CSS** - responsive styling
-- **Cytoscape.js** - graph visualization
+- **Frontend**: React.js 18, Vite 5, Tailwind CSS, Date-fns, Axios.
+- **Backend API**: FastAPI, Python 3.14 / 3.11+, Pydantic v2, SQLAlchemy 2.0.
+- **Persistence**: PostgreSQL when available, with automatic zero-configuration **SQLite fallback** (`org_memory.db`).
+- **Graph & Logic Engine**: NetworkX + Neo4j integration; Deterministic Propositional Logic Engine.
+- **Semantic Similarity**: Scikit-learn TF-IDF vectorizer + SentenceTransformers fallback.
+- **AI / LLM**: OpenAI GPT integration with intelligent heuristic NLP fallback for offline resilience.
 
-### Backend
-- **FastAPI** - high-performance REST API
-- **PostgreSQL** - relational data (decisions metadata, outcomes)
-- **Neo4j (Aura)** - knowledge graph database
+---
 
-### AI/NLP
-- **LLM APIs** - GPT / Llama 3 for decision extraction
-- **LangGraph** - orchestrate AI workflows
-- **Sentence Transformers** - semantic similarity for decision matching
-- **spaCy** - NER (named entity recognition) for entity extraction
-- **Speech-to-text API** - transcribe meetings (future phase)
+## 🚀 Quickstart & Setup
 
-### Infrastructure
-- **AWS / GCP** - cloud hosting
-- **Domain & SSL Certificate** - secure access
-
-## 💰 Cost Estimate (₹20,000)
-| Component | Cost |
-|-----------|------|
-| Cloud Hosting (AWS/GCP) | ₹5,000 |
-| LLM API Credits (GPT/Llama 3) | ₹8,000 |
-| Neo4j Graph DB (Aura) | ₹3,000 |
-| Domain & SSL | ₹1,000 |
-| Speech-to-text API | ₹2,000 |
-| Testing & Misc | ₹1,000 |
-| **Total** | **₹20,000** |
-
-## ⚠️ Risks & Mitigations
-
-| Risk | Mitigation |
-|------|-----------|
-| Decisions are implicit/ambiguous in natural conversation | Use LLM extraction + human-in-loop review for low-confidence cases |
-| Employees hesitate to have decisions recorded/analyzed | Ensure transparency, role-based access control, opt-in review before storage |
-| Outcome tracking requires long-term horizon (weeks/months/years) | Start with short-cycle decisions (weeks, not years) to demonstrate value early |
-
-## 🎓 Skills & Resources
-
-### Skills We Have ✅
-- Web development (React, FastAPI, REST APIs)
-- Working with LLM APIs (GPT, Llama 3)
-- Basic NLP and database design
-
-### Skills We Need to Acquire 📚
-- Graph Neural Networks (advanced KG traversal)
-- Production-scale knowledge graph design (Neo4j enterprise patterns)
-- Speech-to-text pipeline tuning (for meeting transcription)
-
-## 🌍 Sustainable Development Goals
-**Maps to SDG 9** - Industry, Innovation & Infrastructure
-Our solution strengthens organizational knowledge infrastructure and drives innovation in enterprise decision-making by transforming how teams recall, learn, and decide.
-
-**Beneficiaries**:
-- Managers and team leads making recurring business decisions
-- New employees and departments
-- Organization as a whole (institutional knowledge preservation)
-
-**Measurable Impact**:
-- Saves 3-4 hours per week previously spent searching for past decisions
-- Reduces repeated decision-making mistakes by estimated 30-40%
-- Preserves knowledge across employee turnover and restructuring
-
-## 📅 Implementation Roadmap
-
-### Phase 1: Decision Capture MVP
-- Text input interface for capturing decisions
-- LLM-based extraction pipeline
-- Basic decision storage in PostgreSQL
-
-### Phase 2: Knowledge Graph
-- Neo4j graph model implementation
-- Entity linking (decisions ↔ projects, people, outcomes)
-- Similarity search capability
-
-### Phase 3: Recommendation Engine
-- Semantic search for similar decisions
-- Recommendation ranking logic
-- Outcome comparison visualization
-
-### Phase 4: Analytics & Scoring
-- Organizational Memory Score dashboard
-- Decision analytics & trends
-- Team-level insights
-
-## 🚀 Getting Started
-
-### Quick Start (Recommended - Docker)
-
-**Prerequisites**: Docker & Docker Compose
+### 1. Backend Setup
 
 ```bash
-# 1. Clone/navigate to project
-cd organizational-memory-platform
+cd backend
 
-# 2. Copy environment template and add your OpenAI API key
-cp backend/.env.example backend/.env
-# Edit backend/.env and add: OPENAI_API_KEY=sk-your-key
+# Install Python requirements
+pip install fastapi "uvicorn[standard]" sqlalchemy pydantic pydantic-settings python-dotenv scikit-learn pandas
 
-# 3. Start everything
-docker-compose up -d
-
-# 4. Access the application
-# Frontend: http://localhost:3000
-# API: http://localhost:8000
-# Docs: http://localhost:8000/docs
+# Run backend server
+python -m uvicorn main:app --reload --port 8000
 ```
 
-### Manual Setup (For Development)
+The backend starts at `http://localhost:8000` (Swagger UI at `http://localhost:8000/docs`). On startup, it automatically verifies database tables and pre-seeds the enterprise memory scenario!
 
-**Prerequisites**:
-- Python 3.9+ & pip
-- Node.js 18+ & npm
-- PostgreSQL 13+
+### 2. Frontend Setup
 
 ```bash
-# Backend Setup
-cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with your database URL and OpenAI API key
-createdb org_memory
-python main.py
-
-# Frontend Setup (in new terminal)
 cd frontend
+
+# Install packages
 npm install
+
+# Start Vite development server
 npm run dev
 ```
 
-### Verify Installation
+Open `http://localhost:5173` or `http://localhost:3000` in your browser.
 
-1. Open http://localhost:3000
-2. Create a test decision
-3. Try AI extraction with sample text
-4. View saved decisions
+---
 
-See [QUICKSTART.md](./QUICKSTART.md) for detailed setup and examples.
+## 🧪 Running Automated Feature Verification
 
-## 📚 Documentation
+Run the comprehensive test suite exercising all 12 platform features:
 
-- [QUICKSTART.md](./QUICKSTART.md) - 5-minute setup guide
-- [ARCHITECTURE.md](./ARCHITECTURE.md) - System design & components
-- [DEVELOPMENT_CHECKLIST.md](./DEVELOPMENT_CHECKLIST.md) - Implementation roadmap
-- [backend/README.md](./backend/README.md) - Backend API docs
-- [frontend/README.md](./frontend/README.md) - Frontend guide
+```bash
+cd backend
+python test_all_features.py
+```
 
-## 📞 Contact & Support
-Project developed at Sri Eshwar College of Engineering - Design Thinking & Innovation Studio
+Expected output:
+```text
+==================================================
+Testing AI Organizational Memory Platform (12 Features)
+==================================================
+[PASS] Root endpoint online. Features advertised: 12
+[PASS] Seed Data successfully initialized (Priya's Scenario, Phoenix, Supplier B, Dead Ends)
+[PASS] Feature 1 (Decision Memory): Verified full reasoning & journey
+[PASS] Feature 2 (Temporal Validity): Verified expiration warning on 2018 record
+[PASS] Feature 3 (Dead Ends): Catalogued Supplier C with Do NOT Retry badge
+[PASS] Feature 4 & 5 (Guardrails & Neuro-Symbolic): Blocked 20% discount with counter-offer
+[PASS] Feature 5 (Guardrails): Intercepted Supplier C Dead End warning
+[PASS] Feature 6 (Decision Replay): Reconstructed checkpoints & lessons
+[PASS] Feature 7 (Virtual Expert Council): Simulated Sarah, Raj, Priya (78% consensus)
+[PASS] Feature 8 (Explanation-First): Produced 5-layer explanation stack
+[PASS] Feature 9 (Adaptive Learning): Outcome recorded; confidence boosted to 94%
+[PASS] Feature 10 (Dream Mode): Consolidations, contradictions, and insights verified
+[PASS] Feature 12 (Cross-Dept Connections): Monitored links & detected inventory conflicts
+[PASS] Feature 11 (Governance & Score): Memory score calculated
+==================================================
+ALL 12 FEATURES VERIFIED SUCCESSFULLY!
+==================================================
+```

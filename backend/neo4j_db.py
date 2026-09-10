@@ -1,5 +1,12 @@
-from neo4j import GraphDatabase
-from neo4j.exceptions import DriverError
+try:
+    from neo4j import GraphDatabase
+    from neo4j.exceptions import DriverError
+    HAS_NEO4J = True
+except ImportError:
+    HAS_NEO4J = False
+    GraphDatabase = None
+    DriverError = Exception
+
 from settings import settings
 import logging
 
@@ -10,10 +17,15 @@ class Neo4jConnection:
     
     def __init__(self):
         self.driver = None
-        self.connect()
+        if HAS_NEO4J:
+            self.connect()
+        else:
+            logger.info("Neo4j driver package not installed; using graph memory fallback")
     
     def connect(self):
         """Establish connection to Neo4j."""
+        if not HAS_NEO4J:
+            return
         try:
             self.driver = GraphDatabase.driver(
                 settings.neo4j_uri,
@@ -25,8 +37,10 @@ class Neo4jConnection:
                 session.run("RETURN 1")
             logger.info("✅ Connected to Neo4j")
         except DriverError as e:
-            logger.error(f"❌ Failed to connect to Neo4j: {str(e)}")
-            logger.warning("⚠️  Continuing without Neo4j - graph features will be limited")
+            logger.warning(f"⚠️ Failed to connect to Neo4j ({str(e)}) - continuing with local graph engine")
+            self.driver = None
+        except Exception as e:
+            logger.warning(f"⚠️ Neo4j connection skipped ({str(e)})")
             self.driver = None
     
     def close(self):
