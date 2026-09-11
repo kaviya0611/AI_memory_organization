@@ -30,7 +30,8 @@ class Neo4jConnection:
             self.driver = GraphDatabase.driver(
                 settings.neo4j_uri,
                 auth=(settings.neo4j_user, settings.neo4j_password),
-                max_connection_pool_size=50
+                max_connection_pool_size=50,
+                connection_timeout=2.0
             )
             # Verify connection
             with self.driver.session() as session:
