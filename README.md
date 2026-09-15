@@ -1,117 +1,202 @@
-# AI Organizational Memory & Decision Intelligence Platform
+# Organizational Decision Intelligence
 
-> **A living organizational brain that captures how decisions are actually made, stores the reasoning behind them, and uses this memory to guide employees, prevent repeated mistakes, and continuously improve decision quality.**
-
-In simple words: It's not a wiki. It's not a chatbot. It's the organization's collective judgment made permanent, searchable, and actionable.
-
----
-
-## 🔹 12 Unique Core Features
-
-| # | Feature | What It Solves | Key Benefit |
-|---|---------|----------------|-------------|
-| 1 | **Decision Memory** | Systems only store outcomes, not reasoning | Full context: triggers, constraints, alternatives, assumptions & evidence |
-| 2 | **Temporal Validity** | Outdated knowledge misleads new employees | Knowledge expires; confidence decays over time; active outdated warnings |
-| 3 | **Dead Ends Repository** | Repeating costly failed experiments | Captures failures, root causes, costs (₹), and "Do NOT retry" guardrails |
-| 4 | **Neuro-Symbolic Reasoning** | LLM hallucinations & lack of explainability | Neural (language) + Symbolic (logic engine) producing verified proof trees |
-| 5 | **Real-Time Guardrails** | Mistakes happen before anyone notices | Proactive intercept before sending; policy counter-offers and escalations |
-| 6 | **Decision Replay** | Post-mortems cannot reconstruct initial assumptions | Time-travel replay: Day 0 assumptions vs reality timeline divergence |
-| 7 | **Multi-Agent Simulation** | Senior leaders and experts unavailable | Virtual Expert Council (Digital twins of Sarah, Raj, Priya) debating proposals |
-| 8 | **Explanation-First Architecture** | Users distrust black-box AI | 5 layers: Source, Deductive Chain, Confidence, Counterfactuals & Evidence |
-| 9 | **Adaptive Learning** | System never improves from outcomes | Feedback loops: 100% on-time outcome boosts pattern confidence (82% ➔ 94%) |
-| 10 | **Dream Mode** | Memory rots and becomes stale | Nightly background consolidation: detects contradictions, prunes old data, finds gaps |
-| 11 | **Governance-First Execution** | Unchecked AI autonomy and liability | 3-tier trust, monetary authority gates (<₹10L, ₹10-50L, >₹50L), immutable audit trail |
-| 12 | **Cross-Dept Connections** | Siloed decisions cause conflicting promises | Links Sales, Supply Chain, Finance & Ops; detects resource & margin clashes |
+> **Enterprise Decision Memory, Provenance & Outcome Feedback Loop Platform**  
+> Built with **React + TypeScript + Tailwind CSS**, **Python FastAPI**, and **PostgreSQL**.
 
 ---
 
-## 🎯 How It All Works Together: Priya's Procurement Journey
+## 1. Executive Summary
 
-1. **Priya joins as a new procurement manager** ➔ Opens the platform and sees pending supplier decisions.
-2. **System recommends Supplier B with 92% confidence** ➔ Evaluated against 47 historical Q3 decisions.
-3. **Priya asks: *"Why not Supplier A?"*** ➔ Natural language intent parsed by the Neuro-Symbolic engine.
-4. **System explains reasoning & dead ends** ➔ Supplier A had 3 monsoon delivery failures in 5 years; Supplier C is a recorded Dead End (40% defect rate, ₹25 Lakhs loss).
-5. **Priya clicks *"Show Replay"*** ➔ Post-mortem timeline reconstructs the 2021 failure and Project Phoenix lessons.
-6. **Temporal Validity warning fires** ➔ System warns that 2018 recommendations for Supplier A expired 2 years ago.
-7. **Priya approves Supplier B** ➔ Full decision journey (triggers, constraints, rejected options) is permanently captured.
-8. **Dream Mode consolidates overnight** ➔ Background process creates a high-reliability heuristic for Supplier B and prunes stale records.
-9. **Six months later, outcome tracked** ➔ Delivery completed with zero defects; adaptive learning boosts Supplier B confidence to 94%.
-10. **Preserved Collective Memory** ➔ Two years later, the next manager immediately inherits Priya's verified institutional wisdom.
+Existing enterprise search and document repositories can answer *"Where is the document?"*, but fail to answer:
 
----
+- **Why was a decision made?**
+- **What alternatives were considered and rejected?**
+- **Who made the decision and what evidence supported it?**
+- **Did the decision succeed or fail?**
+- **What was the expected outcome versus the actual outcome?**
+- **What can the organization learn from prior outcomes?**
 
-## 🔧 Technology Stack
+**Organizational Decision Intelligence** solves this by formalizing the closed-loop decision lifecycle:
 
-- **Frontend**: React.js 18, Vite 5, Tailwind CSS, Date-fns, Axios.
-- **Backend API**: FastAPI, Python 3.14 / 3.11+, Pydantic v2, SQLAlchemy 2.0.
-- **Persistence**: PostgreSQL when available, with automatic zero-configuration **SQLite fallback** (`org_memory.db`).
-- **Graph & Logic Engine**: NetworkX + Neo4j integration; Deterministic Propositional Logic Engine.
-- **Semantic Similarity**: Scikit-learn TF-IDF vectorizer + SentenceTransformers fallback.
-- **AI / LLM**: OpenAI GPT integration with intelligent heuristic NLP fallback for offline resilience.
-
----
-
-## 🚀 Quickstart & Setup
-
-### 1. Backend Setup
-
-```bash
-cd backend
-
-# Install Python requirements
-pip install fastapi "uvicorn[standard]" sqlalchemy pydantic pydantic-settings python-dotenv scikit-learn pandas
-
-# Run backend server
-python -m uvicorn main:app --reload --port 8000
+```
+Decision ──▶ Reason ──▶ Evidence ──▶ Expected Outcome ──▶ Actual Outcome ──▶ Learning
 ```
 
-The backend starts at `http://localhost:8000` (Swagger UI at `http://localhost:8000/docs`). On startup, it automatically verifies database tables and pre-seeds the enterprise memory scenario!
+---
 
-### 2. Frontend Setup
+## 2. Tech Stack
+
+| Layer | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Frontend** | **React 18 + TypeScript** | Strongly typed, reactive UI with modular component hierarchy |
+| **Styling** | **Tailwind CSS** | Professional dark slate enterprise dashboard |
+| **Build Tool** | **Vite** | Fast HMR dev server and optimized production bundles |
+| **Icons & UI** | **Lucide React** | Clean enterprise iconography |
+| **HTTP Client** | **Axios** | Typed REST API integration with timeout and error interceptors |
+| **Backend** | **Python FastAPI** | Asynchronous, high-performance REST APIs with OpenAPI docs |
+| **ORM / Data** | **SQLAlchemy 2.0** | Relational schema modeling and database session management |
+| **Validation** | **Pydantic v2** | Strict request/response data contracts |
+| **Database** | **PostgreSQL** | Primary relational database (`psycopg2-binary`) |
+| **Fallback** | **SQLite** | Transparent local fallback if PostgreSQL instance is offline |
+
+---
+
+## 3. Project Structure
+
+```
+memory_organization/
+├── .env                          # Root environment variables
+├── .env.example                  # Root environment template
+├── README.md                     # Comprehensive platform documentation
+│
+├── backend/                      # Python FastAPI Backend
+│   ├── .env                      # Backend environment variables
+│   ├── .env.example              # Backend environment template
+│   ├── database.py               # SQLAlchemy PostgreSQL engine with SQLite fallback
+│   ├── main.py                   # FastAPI app, lifespan, CORS, health & root endpoints
+│   ├── models.py                 # SQLAlchemy 2.0 models (Decisions, Outcomes, Lessons, etc.)
+│   ├── schemas.py                # Pydantic v2 request & response validation schemas
+│   ├── settings.py               # Pydantic BaseSettings environment loader
+│   ├── requirements.txt          # Python dependencies
+│   ├── test_api_endpoints.py     # Automated backend verification test suite
+│   ├── routes/
+│   │   └── decisions.py          # REST endpoints for decisions, outcomes, and audit trail
+│   └── services/
+│       └── seed_service.py       # Enterprise memory seed service (Departments, Decisions, etc.)
+│
+└── frontend/                     # React 18 + TypeScript Frontend
+    ├── .env                      # Frontend environment variables
+    ├── .env.example              # Frontend environment template
+    ├── index.html                # HTML entry template with Google Fonts (Inter, Outfit)
+    ├── package.json              # NPM dependencies and scripts
+    ├── tsconfig.json             # TypeScript compiler configuration
+    ├── tsconfig.node.json        # Vite TypeScript node configuration
+    ├── vite.config.js            # Vite bundler configuration
+    ├── tailwind.config.js        # Tailwind CSS theme configuration
+    └── src/
+        ├── main.tsx              # Application entry point
+        ├── App.tsx               # Enterprise Decision Intelligence dashboard
+        ├── index.css             # Tailwind base styles and dark theme tokens
+        ├── vite-env.d.ts         # Vite client type definitions
+        ├── types/
+        │   └── index.ts          # TypeScript interfaces (Decision, Outcome, Health, etc.)
+        └── services/
+            └── api.ts            # Typed Axios API client
+```
+
+---
+
+## 4. Environment Configuration
+
+### Root & Backend `.env`
+Create `.env` (or copy `.env.example`):
 
 ```bash
+# Database Configuration (PostgreSQL)
+DATABASE_URL=postgresql://postgres:password@localhost:5432/org_memory
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=password
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=org_memory
+
+# Backend Server
+SERVER_HOST=0.0.0.0
+SERVER_PORT=8000
+DEBUG=True
+
+# Optional Graph Database
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USER=neo4j
+NEO4J_PASSWORD=password
+
+# Frontend API URL
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+> **Smart Database Resilience**: If PostgreSQL is running on `localhost:5432`, the application automatically connects to PostgreSQL. If PostgreSQL is offline or credentials are missing, the backend **gracefully falls back to local SQLite** (`org_memory.db`) so development and testing continue without disruption.
+
+---
+
+## 5. How to Run Locally
+
+### Prerequisites
+- Python 3.10+ (Tested on Python 3.14)
+- Node.js 18+ & npm (Tested on Node v24)
+- PostgreSQL (Optional for local testing; SQLite fallback is automatic)
+
+### Step 1: Run the Backend (FastAPI)
+
+```bash
+# 1. Navigate to backend directory
+cd backend
+
+# 2. Install Python dependencies
+pip install -r requirements.txt
+
+# 3. Start the FastAPI development server
+python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+- API Server: `http://localhost:8000`
+- Interactive Swagger API Docs: `http://localhost:8000/docs`
+- Health & Database Diagnostics: `http://localhost:8000/health`
+
+### Step 2: Run the Frontend (React + TypeScript)
+
+Open a new terminal:
+
+```bash
+# 1. Navigate to frontend directory
 cd frontend
 
-# Install packages
+# 2. Install Node dependencies
 npm install
 
-# Start Vite development server
+# 3. Start the Vite development server
 npm run dev
 ```
 
-Open `http://localhost:5173` or `http://localhost:3000` in your browser.
+- Web Application: `http://localhost:5173`
 
 ---
 
-## 🧪 Running Automated Feature Verification
+## 6. Core API Endpoints
 
-Run the comprehensive test suite exercising all 12 platform features:
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/` | Platform overview and feedback loop metadata |
+| `GET` | `/health` | Live health check with database engine, latency & fallback status |
+| `GET` | `/api/departments` | List organizational departments |
+| `GET` | `/api/projects` | List active projects and strategic initiatives |
+| `GET` | `/api/analytics` | Summary metrics: total decisions, outcomes tracked, avg confidence |
+| `GET` | `/api/decisions/` | List decisions with department/status filtering |
+| `POST` | `/api/decisions/` | Record a new organizational decision with reasoning and targets |
+| `GET` | `/api/decisions/{id}` | Retrieve decision details with evidence, alternatives & outcomes |
+| `POST` | `/api/decisions/{id}/outcome` | Record actual result, calculate variance, and capture lesson |
+
+---
+
+## 7. Automated Testing & Verification
+
+Run the automated backend test suite:
 
 ```bash
 cd backend
-python test_all_features.py
+python test_api_endpoints.py
 ```
 
-Expected output:
-```text
-==================================================
-Testing AI Organizational Memory Platform (12 Features)
-==================================================
-[PASS] Root endpoint online. Features advertised: 12
-[PASS] Seed Data successfully initialized (Priya's Scenario, Phoenix, Supplier B, Dead Ends)
-[PASS] Feature 1 (Decision Memory): Verified full reasoning & journey
-[PASS] Feature 2 (Temporal Validity): Verified expiration warning on 2018 record
-[PASS] Feature 3 (Dead Ends): Catalogued Supplier C with Do NOT Retry badge
-[PASS] Feature 4 & 5 (Guardrails & Neuro-Symbolic): Blocked 20% discount with counter-offer
-[PASS] Feature 5 (Guardrails): Intercepted Supplier C Dead End warning
-[PASS] Feature 6 (Decision Replay): Reconstructed checkpoints & lessons
-[PASS] Feature 7 (Virtual Expert Council): Simulated Sarah, Raj, Priya (78% consensus)
-[PASS] Feature 8 (Explanation-First): Produced 5-layer explanation stack
-[PASS] Feature 9 (Adaptive Learning): Outcome recorded; confidence boosted to 94%
-[PASS] Feature 10 (Dream Mode): Consolidations, contradictions, and insights verified
-[PASS] Feature 12 (Cross-Dept Connections): Monitored links & detected inventory conflicts
-[PASS] Feature 11 (Governance & Score): Memory score calculated
-==================================================
-ALL 12 FEATURES VERIFIED SUCCESSFULLY!
-==================================================
+Run TypeScript compilation and production build check:
+
+```bash
+cd frontend
+npm run typecheck
+npm run build
 ```
+
+---
+
+## 8. Next Roadmap (Phase 2)
+- **AI Document Ingestion**: Upload PDF, DOCX, TXT to extract decisions with human confirmation.
+- **pgvector Semantic Search**: Retrieve past decisions based on natural language queries.
+- **Decision Advisor**: Recommend actions for new scenarios based on historical outcomes and dead ends.

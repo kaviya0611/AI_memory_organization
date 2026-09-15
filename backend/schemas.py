@@ -1,9 +1,113 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List, Dict, Any, Union
 from datetime import datetime
 from uuid import UUID
 from models import DecisionStatus, TrustTier, GovernanceLevel
 
+# -------------------------------------------------------------
+# System Health & Diagnostic Schemas
+# -------------------------------------------------------------
+class DatabaseStatus(BaseModel):
+    connected: bool
+    type: str
+    url: str
+    fallback_active: bool
+    error: Optional[str] = None
+
+class HealthResponse(BaseModel):
+    status: str
+    platform: str
+    version: str
+    database: DatabaseStatus
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+# -------------------------------------------------------------
+# Department & Project Schemas
+# -------------------------------------------------------------
+class DepartmentBase(BaseModel):
+    id: str
+    name: str
+    code: Optional[str] = None
+    description: Optional[str] = None
+
+class DepartmentCreate(DepartmentBase):
+    pass
+
+class DepartmentResponse(DepartmentBase):
+    created_at: Optional[datetime] = None
+    model_config = ConfigDict(from_attributes=True)
+
+class ProjectBase(BaseModel):
+    id: str
+    name: str
+    department_id: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = "Active"
+
+class ProjectCreate(ProjectBase):
+    pass
+
+class ProjectResponse(ProjectBase):
+    created_at: Optional[datetime] = None
+    model_config = ConfigDict(from_attributes=True)
+
+# -------------------------------------------------------------
+# Evidence, Alternative, Outcome & Lesson Schemas
+# -------------------------------------------------------------
+class EvidenceItemCreate(BaseModel):
+    evidence_type: str = "metric"
+    description: str
+    source_reference: Optional[str] = None
+
+class EvidenceItemResponse(EvidenceItemCreate):
+    id: UUID
+    decision_id: UUID
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class AlternativeItemCreate(BaseModel):
+    title: str
+    description: Optional[str] = None
+    reason_rejected: Optional[str] = None
+
+class AlternativeItemResponse(AlternativeItemCreate):
+    id: UUID
+    decision_id: UUID
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class OutcomeCreate(BaseModel):
+    actual_result: str
+    expected_result: Optional[str] = None
+    expected_cost: Optional[float] = None
+    actual_cost: Optional[float] = None
+    expected_timeline: Optional[str] = None
+    actual_timeline: Optional[str] = None
+    outcome_status: Optional[str] = "Successful"
+    lessons_learned: Optional[str] = None
+    recorded_by: Optional[str] = None
+
+class OutcomeResponse(OutcomeCreate):
+    id: UUID
+    decision_id: UUID
+    variance_percentage: Optional[float] = None
+    recorded_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+class LessonCreate(BaseModel):
+    title: str
+    takeaway: str
+    category: Optional[str] = "Process"
+
+class LessonResponse(LessonCreate):
+    id: UUID
+    decision_id: UUID
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+# -------------------------------------------------------------
+# Core Decision Schemas
+# -------------------------------------------------------------
 class DecisionCreate(BaseModel):
     title: str = Field(..., min_length=3, max_length=255)
     description: Optional[str] = None
@@ -43,7 +147,7 @@ class DecisionUpdate(BaseModel):
     risks: Optional[List[str]] = None
     expected_outcome: Optional[str] = None
     actual_outcome: Optional[str] = None
-    status: Optional[DecisionStatus] = None
+    status: Optional[str] = None
     constraints: Optional[List[str]] = None
     alternatives_considered: Optional[List[str]] = None
     rejected_reasons: Optional[Dict[str, str]] = None
@@ -56,7 +160,7 @@ class DecisionResponse(BaseModel):
     id: UUID
     title: str
     description: Optional[str] = None
-    decision_statement: str
+    decision_statement: Optional[str] = None
     reasoning: Optional[str] = None
     stakeholders: Optional[List[str]] = None
     risks: Optional[List[str]] = None
@@ -68,7 +172,7 @@ class DecisionResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     confidence_score: float = 0.0
-    status: DecisionStatus
+    status: Optional[str] = None
     extraction_notes: Optional[str] = None
 
     # Feature 1: Full Decision Memory
@@ -93,13 +197,21 @@ class DecisionResponse(BaseModel):
     monetary_value: Optional[float] = 0.0
     governance_level: Optional[str] = None
     approval_chain: Optional[List[Dict[str, Any]]] = None
-    
-    class Config:
-        from_attributes = True
 
+    # Nested child relationships
+    evidence_items: Optional[List[EvidenceItemResponse]] = []
+    alternatives: Optional[List[AlternativeItemResponse]] = []
+    outcomes: Optional[List[OutcomeResponse]] = []
+    lessons: Optional[List[LessonResponse]] = []
+    
+    model_config = ConfigDict(from_attributes=True)
+
+# -------------------------------------------------------------
+# Extraction, Guardrails, Replay, Simulation, Dead Ends
+# -------------------------------------------------------------
 class ExtractionRequest(BaseModel):
     text: str = Field(..., min_length=10)
-    source_type: Optional[str] = "text"  # email, meeting, chat, report, etc.
+    source_type: Optional[str] = "text"
 
 class ExtractionResponse(BaseModel):
     decision_statement: str
@@ -115,7 +227,6 @@ class ExtractionResponse(BaseModel):
     rejected_reasons: Optional[Dict[str, str]] = None
     assumptions: Optional[List[str]] = None
 
-# Feature 3: Dead End Schemas
 class DeadEndCreate(BaseModel):
     topic: str
     attempted_solution: str
@@ -137,11 +248,16 @@ class DeadEndResponse(BaseModel):
     failure_date: Optional[str] = None
     department_id: Optional[str] = None
     created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+class GuardrailRuleViolation(BaseModel):
+    rule_id: str
+    severity: str
+    message: str
+    evidence: str
+    counter_offer: Optional[str] = None
+    escalation_path: Optional[str] = None
 
-# Feature 4 & 5: Guardrails and Neuro-Symbolic Schemas
 class GuardrailCheckRequest(BaseModel):
     decision_draft: str = Field(..., min_length=5)
     department_id: Optional[str] = "Procurement"
@@ -151,17 +267,9 @@ class GuardrailCheckRequest(BaseModel):
     discount_percentage: Optional[float] = None
     context: Optional[Dict[str, Any]] = None
 
-class GuardrailRuleViolation(BaseModel):
-    rule_id: str
-    severity: str  # "CRITICAL", "WARNING", "INFO"
-    message: str
-    evidence: str
-    counter_offer: Optional[str] = None
-    escalation_path: Optional[str] = None
-
 class GuardrailCheckResponse(BaseModel):
     passed: bool
-    status: str  # "APPROVED", "INTERVENTION_REQUIRED", "BLOCKED"
+    status: str
     violations: List[GuardrailRuleViolation]
     dead_end_warnings: List[Dict[str, Any]]
     temporal_warnings: List[str]
@@ -169,7 +277,6 @@ class GuardrailCheckResponse(BaseModel):
     logic_proof_tree: List[str]
     recommendation: str
 
-# Feature 6: Decision Replay Schemas
 class ReplayCheckpoint(BaseModel):
     phase: str
     timestamp: str
@@ -192,11 +299,10 @@ class DecisionReplayResponse(BaseModel):
     lessons_learned: List[str]
     audit_trail: List[Dict[str, Any]]
 
-# Feature 7: Multi-Agent Simulation Schemas
 class AgentStance(BaseModel):
     expert_name: str
     role: str
-    stance: str  # "SUPPORTIVE", "OPPOSED", "CAUTIOUS"
+    stance: str
     confidence: float
     arguments: List[str]
     key_risk: str
@@ -209,13 +315,12 @@ class MultiAgentSimulationRequest(BaseModel):
 class MultiAgentSimulationResponse(BaseModel):
     question: str
     simulated_experts: List[AgentStance]
-    consensus_score: float  # 0 to 100%
-    consensus_status: str   # "HIGH CONSENSUS", "SPLIT COUNCIL", "STRONG OPPOSITION"
+    consensus_score: float
+    consensus_status: str
     key_disagreements: List[str]
     synthesized_recommendation: str
     conditions_to_proceed: List[str]
 
-# Feature 8: Explanation-First Schemas
 class ExplanationResponse(BaseModel):
     recommendation: str
     confidence_level: str
@@ -226,7 +331,6 @@ class ExplanationResponse(BaseModel):
     layer4_counterfactuals: List[str]
     layer5_evidence_links: List[Dict[str, str]]
 
-# Feature 10: Dream Mode Schemas
 class DreamModeRunResponse(BaseModel):
     id: UUID
     run_timestamp: datetime
@@ -240,7 +344,6 @@ class DreamModeRunResponse(BaseModel):
     pruned_records: List[Dict[str, Any]]
     knowledge_gaps: List[str]
 
-# Feature 12: Cross-Department Dependency Schemas
 class DepartmentDependencyResponse(BaseModel):
     id: UUID
     source_department: str
@@ -253,7 +356,4 @@ class DepartmentDependencyResponse(BaseModel):
     is_active: bool = True
     has_conflict: bool = False
     conflict_message: Optional[str] = None
-
-    class Config:
-        from_attributes = True
-
+    model_config = ConfigDict(from_attributes=True)

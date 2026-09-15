@@ -12,30 +12,28 @@ ACTIVE_DB_URL = settings.database_url
 DB_CONNECTED = False
 DB_ERROR_MESSAGE = None
 
-# Database URL with automatic SQLite fallback if PostgreSQL is not reachable
 DATABASE_URL = settings.database_url
-connect_args = {}
 
 is_sqlite = DATABASE_URL.startswith("sqlite")
 if not is_sqlite:
     try:
         import psycopg2
+        connect_args = {"connect_timeout": 3}
     except ImportError:
         logger.warning("psycopg2 not found; falling back to local SQLite database (org_memory.db)")
         DATABASE_URL = "sqlite:///./org_memory.db"
         is_sqlite = True
-
-if is_sqlite:
+        connect_args = {"check_same_thread": False}
+else:
     connect_args = {"check_same_thread": False}
 
 try:
-    # Attempt to connect to configured database (PostgreSQL by default)
+    # Attempt connection to configured primary database (PostgreSQL by default)
     engine = create_engine(
         DATABASE_URL,
         echo=False,
         connect_args=connect_args,
         pool_pre_ping=True if not is_sqlite else False,
-        connect_timeout=3 if not is_sqlite else None
     )
     # Test connection
     with engine.connect() as conn:
@@ -47,7 +45,7 @@ try:
 except Exception as err:
     DB_ERROR_MESSAGE = str(err)
     logger.warning(
-        f"⚠️ Could not connect to primary database ({DATABASE_URL}): {err}. "
+        f"⚠️ Could not connect to primary PostgreSQL ({DATABASE_URL}): {err}. "
         "Falling back to local SQLite database: sqlite:///./org_memory.db"
     )
     DATABASE_URL = "sqlite:///./org_memory.db"

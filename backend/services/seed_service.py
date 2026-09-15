@@ -2,12 +2,16 @@
 Enterprise Seed Service
 
 Pre-populates organizational memory with realistic scenarios,
-specifically enabling Priya's Procurement Journey, Project Phoenix Replay,
-Customer Y Guardrail Checks, Dead Ends, and Cross-Department Dependencies.
+departments, projects, decisions, outcomes, evidence, lessons,
+dead ends, and cross-department dependencies.
 """
 
 from sqlalchemy.orm import Session
-from models import Decision, DecisionStatus, DeadEnd, DepartmentDependency, AuditLogEntry, TrustTier, GovernanceLevel
+from models import (
+    Decision, DecisionStatus, DeadEnd, DepartmentDependency, AuditLogEntry,
+    TrustTier, GovernanceLevel, Department, Project, Outcome, Lesson,
+    DecisionEvidence, DecisionAlternative
+)
 from datetime import datetime, timedelta
 import json
 import uuid
@@ -26,7 +30,13 @@ def seed_enterprise_data(db: Session, force: bool = False):
 
     # Clear existing if force
     if force:
+        db.query(Lesson).delete()
+        db.query(Outcome).delete()
+        db.query(DecisionAlternative).delete()
+        db.query(DecisionEvidence).delete()
         db.query(Decision).delete()
+        db.query(Project).delete()
+        db.query(Department).delete()
         db.query(DeadEnd).delete()
         db.query(DepartmentDependency).delete()
         db.query(AuditLogEntry).delete()
@@ -34,13 +44,44 @@ def seed_enterprise_data(db: Session, force: bool = False):
 
     now = datetime.utcnow()
 
+    # -------------------------------------------------------------
+    # 1. Departments
+    # -------------------------------------------------------------
+    dept_procurement = Department(id="Procurement", name="Global Procurement & Sourcing", code="PROC", description="Vendor evaluations, contract negotiations, and direct component sourcing.")
+    dept_operations = Department(id="Operations", name="Global Operations & Logistics", code="OPS", description="Fulfillment, warehousing, distribution networks, and field services.")
+    dept_engineering = Department(id="Engineering", name="Cloud & Software Engineering", code="ENG", description="Core infrastructure, developer platforms, and enterprise software.")
+    dept_finance = Department(id="Finance", name="Corporate Finance & FP&A", code="FIN", description="Budgetary allocations, unit economics, margin protections, and treasury.")
+    dept_sales = Department(id="Sales", name="Enterprise Sales & Commercial", code="SALES", description="Global enterprise client agreements and revenue operations.")
+    dept_product = Department(id="Product", name="Product Management", code="PROD", description="Strategic roadmap, user experience, and feature delivery.")
+
+    db.add_all([dept_procurement, dept_operations, dept_engineering, dept_finance, dept_sales, dept_product])
+    db.commit()
+
+    # -------------------------------------------------------------
+    # 2. Projects
+    # -------------------------------------------------------------
+    proj_supply = Project(id="PROJ-SUPPLY-2024", name="Q3 Monsoon Component Supply Resilience", department_id="Procurement", description="Dual-sourcing critical electronics ahead of seasonal monsoons.")
+    proj_phoenix = Project(id="PROJ-PHOENIX-2023", name="Project Phoenix Warehouse Automation", department_id="Operations", description="Automated sorting and robotics deployment in western hub.")
+    proj_sales = Project(id="PROJ-ENTERPRISE-SALES", name="Enterprise Tier Commercial Acceleration", department_id="Sales", description="Strategic discount and multi-year contract renewals.")
+    proj_cloud = Project(id="PROJ-CLOUD-MIG", name="Core Banking Service Cloud Migration", department_id="Engineering", description="Lift and modernize internal microservices from on-prem to cloud.")
+
+    db.add_all([proj_supply, proj_phoenix, proj_sales, proj_cloud])
+    db.commit()
+
+    # -------------------------------------------------------------
+    # 3. Decisions
+    # -------------------------------------------------------------
     # 1. Supplier B Approval (Decision Memory Showcase)
+    dec_supplier_b_id = uuid.uuid4()
     dec_supplier_b = Decision(
-        id=uuid.uuid4(),
+        id=dec_supplier_b_id,
         title="Approved Supplier B for Q3 Critical Components",
         description="Comprehensive supplier evaluation and award for Q3 monsoon manufacturing cycle.",
         decision_statement="Approved Supplier B because Supplier A had monsoon reliability issues (3 failures in 5 years), Supplier C was a known dead end (2021 quality failure), and budget allowed for the 12% premium.",
         reasoning="Supplier B provides 98.4% on-time delivery during monsoon months and operates dual regional hubs. Although priced at a 12% premium over Supplier A, the avoided risk of downtime (estimated at ₹35L per day) heavily justifies the investment.",
+        reason="Mitigate monsoon logistics disruptions and guarantee 98% on-time delivery.",
+        timeline="6 months",
+        decision_maker="Sarah Chen (Supply Chain Lead)",
         stakeholders=json.dumps(["Sarah Chen (Supply Chain)", "Raj Malhotra (Finance)", "Priya Sharma (Operations)"]),
         risks=json.dumps(["12% cost premium relative to unvetted market rates", "Initial onboarding lead time of 10 days"]),
         expected_outcome="Zero delivery disruptions during monsoon with 98% quality conformance.",
@@ -50,10 +91,8 @@ def seed_enterprise_data(db: Session, force: bool = False):
         created_by="Sarah Chen",
         created_at=now - timedelta(days=120),
         confidence_score=0.92,
-        status=DecisionStatus.APPROVED,
+        status="Successful",
         extraction_notes="Extracted from Q1 Executive Procurement Committee Review",
-        
-        # Decision Memory fields
         triggers="Rising logistics failure rate during monsoon season & annual contract expiration.",
         constraints=json.dumps([
             "Budget cap: ₹60 Lakhs",
@@ -72,7 +111,6 @@ def seed_enterprise_data(db: Session, force: bool = False):
         ]),
         evidence_links=json.dumps([
             "DEC-2021-00334",
-            "DEC-2021-00456",
             "Policy-15: Pricing Rules",
             "INC-2023-07: Supplier A Delay Audit"
         ]),
@@ -82,47 +120,20 @@ def seed_enterprise_data(db: Session, force: bool = False):
         is_expired=False,
         trust_tier=TrustTier.HUMAN_CONFIRMED.value,
         monetary_value=48.0,
-        governance_level=GovernanceLevel.MEDIUM.value,
-        approval_chain=json.dumps([
-            {"actor": "Sarah Chen", "action": "PROPOSED", "time": (now - timedelta(days=122)).isoformat()},
-            {"actor": "Raj Malhotra", "action": "FINANCE_RATIFIED", "time": (now - timedelta(days=121)).isoformat()},
-            {"actor": "VP Procurement", "action": "FINAL_APPROVAL", "time": (now - timedelta(days=120)).isoformat()}
-        ])
-    )
-
-    # 2. Historical Supplier A Decision (Temporal Validity Showcase - Expired)
-    dec_supplier_a_old = Decision(
-        id=uuid.uuid4(),
-        title="Supplier A Sole Source Contract (2018)",
-        description="Historical vendor selection for generic hardware parts.",
-        decision_statement="Approved Supplier A as primary supplier based on lowest bid pricing.",
-        reasoning="Supplier A offered lowest per-unit unit cost with acceptable lead times.",
-        stakeholders=json.dumps(["Legacy Procurement Team"]),
-        risks=json.dumps(["Single point of failure during severe weather"]),
-        expected_outcome="Reduce annual component expenditure by 18%.",
-        actual_outcome="Initial savings achieved, but subsequently suffered 3 catastrophic delivery halts during monsoon.",
-        project_id="HIST-VENDOR-2018",
-        department_id="Procurement",
-        created_by="Former Manager",
-        created_at=now - timedelta(days=1800),
-        confidence_score=0.45,
-        status=DecisionStatus.APPROVED,
-        valid_from=now - timedelta(days=1800),
-        valid_until=now - timedelta(days=730),  # Expired 2 years ago
-        decay_rate=0.10,
-        is_expired=True,
-        trust_tier=TrustTier.RAW_SOURCE.value,
-        monetary_value=32.0,
         governance_level=GovernanceLevel.MEDIUM.value
     )
 
-    # 3. Project Phoenix (Decision Replay Showcase)
+    # 2. Project Phoenix (Decision Replay & Post-Mortem Showcase)
+    dec_project_phoenix_id = uuid.uuid4()
     dec_project_phoenix = Decision(
-        id=uuid.uuid4(),
-        title="Project Phoenix Warehouse Automation Launch",
+        id=dec_project_phoenix_id,
+        title="Project Phoenix Warehouse Automation Direct Rollout",
         description="Fast-track deployment of automated sorting systems across Western distribution centers.",
         decision_statement="Approved direct nationwide rollout of Project Phoenix automation without a regional pilot.",
         reasoning="Executive directive to leapfrog competitors and cut fulfillment latency before Q4 peak sales.",
+        reason="Accelerate throughput and reduce manual warehouse sorting overhead by 50%.",
+        timeline="3 months",
+        decision_maker="David Ross (VP Operations)",
         stakeholders=json.dumps(["David Ross (VP Ops)", "Anita Patel (Logistics)", "Kavita Rao (Engineering)"]),
         risks=json.dumps(["Integration mismatch with legacy ERP", "Vendor capacity limits under high throughput"]),
         expected_outcome="35% increase in order throughput and 50% labor cost reduction.",
@@ -132,7 +143,7 @@ def seed_enterprise_data(db: Session, force: bool = False):
         created_by="David Ross",
         created_at=now - timedelta(days=400),
         confidence_score=0.30,
-        status=DecisionStatus.APPROVED,
+        status="Failed",
         triggers="Competitive pressure and executive urgency.",
         constraints=json.dumps(["Launch deadline fixed to September 30", "No budget for parallel pilot"]),
         alternatives_considered=json.dumps(["Full Immediate Rollout", "90-Day Phased Regional Pilot", "Hybrid Manual Automation"]),
@@ -141,11 +152,10 @@ def seed_enterprise_data(db: Session, force: bool = False):
             "Hybrid Manual Automation": "Deemed insufficiently transformative."
         }),
         assumptions=json.dumps([
-            "Customer demand will grow +15% (actual: -5%)",
-            "Supplier automated sorting hardware can scale without custom firmware (actual: couldn't)",
-            "Staff can adapt to automated software in 48 hours without specialized training (actual: high operator errors)"
+            "Vendor firmware was production-hardened",
+            "Warehouse floor staff would adapt without specialized retraining",
+            "Legacy ERP could handle real-time MQTT message queues"
         ]),
-        evidence_links=json.dumps(["PHX-EXEC-DIR-2023", "ERP-SPEC-V2", "POST-MORTEM-PHOENIX-REPORT"]),
         valid_from=now - timedelta(days=400),
         valid_until=now + timedelta(days=100),
         trust_tier=TrustTier.HUMAN_CONFIRMED.value,
@@ -153,116 +163,163 @@ def seed_enterprise_data(db: Session, force: bool = False):
         governance_level=GovernanceLevel.HIGH_STAKES.value
     )
 
-    # 4. Customer Y Discount Request (Neuro-Symbolic & Guardrails Showcase)
-    dec_customer_y = Decision(
-        id=uuid.uuid4(),
-        title="Special Pricing Request: Customer Y 20% Discount",
-        description="High-value client requesting 20% discount on Q3 bulk procurement.",
-        decision_statement="Proposal to approve 20% volume discount for Customer Y on an 800-unit bulk order.",
-        reasoning="Customer Y is a strategic account requesting matching competitor pricing.",
-        stakeholders=json.dumps(["Regional Sales Director", "Account Executive"]),
-        risks=json.dumps(["EBITDA margin dilution", "Precedent for other Tier-2 clients"]),
-        expected_outcome="Secure 800-unit contract and achieve quarterly sales target.",
-        actual_outcome=None,
-        project_id="SALES-DEAL-2024",
-        department_id="Sales",
-        created_by="Sales Executive",
-        created_at=now - timedelta(days=3),
-        confidence_score=0.55,
-        status=DecisionStatus.PENDING_REVIEW,
-        triggers="Competitor offering price discount on similar SKUs.",
-        constraints=json.dumps(["Policy-15 limits standard discount to 15%", "Customer tenure is 3 years"]),
-        alternatives_considered=json.dumps(["Approve 20% Request", "Counter-offer at 12%", "Escalate to VP Finance for waiver"]),
-        rejected_reasons=json.dumps({
-            "Counter-offer at 12%": "Account executive feared customer would walk away."
-        }),
-        assumptions=json.dumps(["Customer will commit to immediate payment in 15 days"]),
-        evidence_links=json.dumps(["Policy-15: Commercial Pricing", "DEC-2023-00412: Rejected 20% Discount Precedent"]),
-        trust_tier=TrustTier.AI_DERIVED.value,
-        monetary_value=24.0,
-        governance_level=GovernanceLevel.MEDIUM.value
+    # 3. Core Banking Cloud Migration (Engineering Showcase)
+    dec_cloud_mig_id = uuid.uuid4()
+    dec_cloud_mig = Decision(
+        id=dec_cloud_mig_id,
+        title="Migrate Core Transaction Services to Multi-Region Cloud",
+        description="Transition legacy on-premises microservices to cloud container clusters with managed DBs.",
+        decision_statement="Migrate transaction processing services to managed cloud infrastructure to slash infra costs and improve peak uptime.",
+        reasoning="Legacy hardware is nearing end-of-life; cloud elasticity will eliminate over-provisioning during billing spikes.",
+        reason="Reduce infrastructure operational costs by 20% while providing auto-scaling for flash traffic.",
+        timeline="6 months",
+        decision_maker="Vikram Sen (Chief Architect)",
+        stakeholders=json.dumps(["Vikram Sen (Architect)", "Ananya Roy (VP Eng)", "DevOps Council"]),
+        risks=json.dumps(["Migration downtime", "Latency variance across regions", "Database replication lag"]),
+        expected_outcome="20% infrastructure cost reduction and 99.99% availability during quarterly closes.",
+        actual_outcome="16% cost reduction achieved; migration took 7.5 months due to staging integration tests.",
+        project_id="PROJ-CLOUD-MIG",
+        department_id="Engineering",
+        created_by="Vikram Sen",
+        created_at=now - timedelta(days=210),
+        confidence_score=0.88,
+        status="Partially Successful",
+        valid_from=now - timedelta(days=210),
+        valid_until=now + timedelta(days=500),
+        trust_tier=TrustTier.HUMAN_CONFIRMED.value,
+        monetary_value=65.0,
+        governance_level=GovernanceLevel.HIGH_STAKES.value
     )
 
-    # 5. Dead Ends Repository
+    db.add_all([dec_supplier_b, dec_project_phoenix, dec_cloud_mig])
+    db.commit()
+
+    # -------------------------------------------------------------
+    # 4. Evidence, Alternatives, Outcomes & Lessons
+    # -------------------------------------------------------------
+    # Evidence for Supplier B
+    ev1 = DecisionEvidence(decision_id=dec_supplier_b_id, evidence_type="audit", description="Historical monsoon delivery audit: Supplier B scored 98.4% vs Supplier A's 71.2%.", source_reference="INC-2023-07")
+    ev2 = DecisionEvidence(decision_id=dec_supplier_b_id, evidence_type="financial", description="Calculated cost of factory stoppage: ₹35 Lakhs per day.", source_reference="FIN-RISK-2024-Q1")
+
+    # Alternatives for Supplier B
+    alt1 = DecisionAlternative(decision_id=dec_supplier_b_id, title="Supplier A", description="Lowest cost baseline vendor", reason_rejected="Failed 3 times in 5 years during monsoon weather.")
+    alt2 = DecisionAlternative(decision_id=dec_supplier_b_id, title="Supplier C", description="Local vendor with aggressive delivery promises", reason_rejected="Organizational dead end from 2021 with 40% defect rate.")
+
+    # Outcome for Supplier B
+    out1 = Outcome(
+        decision_id=dec_supplier_b_id,
+        expected_result="Zero delivery disruptions during monsoon with 98% quality conformance.",
+        actual_result="Delivered 100% on time, zero defects during peak monsoon. Performance SLA fully met.",
+        expected_cost=48.0,
+        actual_cost=49.2,
+        expected_timeline="6 months",
+        actual_timeline="5.5 months",
+        variance_percentage=-2.5,
+        outcome_status="Successful",
+        lessons_learned="Investing in a proven reliability tier with dual regional distribution hubs protects critical manufacturing pipelines.",
+        recorded_by="Sarah Chen"
+    )
+
+    # Lesson for Supplier B
+    les1 = Lesson(
+        decision_id=dec_supplier_b_id,
+        title="Reliability Premium Justification in Monsoon Cycles",
+        takeaway="Paying a 12% premium for dual-hub regional logistics consistently eliminates multi-crore factory downtime risks during severe weather.",
+        category="Vendor"
+    )
+
+    # Outcome for Project Phoenix
+    out2 = Outcome(
+        decision_id=dec_project_phoenix_id,
+        expected_result="35% increase in order throughput and 50% labor cost reduction.",
+        actual_result="System crashed on Day 28 due to unvalidated firmware. Total loss: ₹42 Lakhs, 6 weeks of delayed customer deliveries.",
+        expected_cost=85.0,
+        actual_cost=127.0,
+        expected_timeline="3 months",
+        actual_timeline="Failed after 1 month",
+        variance_percentage=49.4,
+        outcome_status="Failed",
+        lessons_learned="Bypassing a regional pilot under executive time pressure causes systemic operational failures when integrating proprietary firmware with legacy ERPs.",
+        recorded_by="David Ross"
+    )
+
+    # Lesson for Project Phoenix
+    les2 = Lesson(
+        decision_id=dec_project_phoenix_id,
+        title="Mandatory Phased Pilots for Industrial Automation",
+        takeaway="Never bypass a 90-day regional validation phase for high-throughput robotics, regardless of executive launch target dates.",
+        category="Process"
+    )
+
+    # Outcome for Cloud Migration
+    out3 = Outcome(
+        decision_id=dec_cloud_mig_id,
+        expected_result="20% infrastructure cost reduction and 99.99% availability.",
+        actual_result="16% cost reduction achieved. Staging tests took 1.5 months longer than anticipated.",
+        expected_cost=65.0,
+        actual_cost=68.5,
+        expected_timeline="6 months",
+        actual_timeline="7.5 months",
+        variance_percentage=-20.0,
+        outcome_status="Partially Successful",
+        lessons_learned="Cloud database migration timeline models should always factor in 20% buffer for complex legacy schema synchronization.",
+        recorded_by="Vikram Sen"
+    )
+
+    # Lesson for Cloud Migration
+    les3 = Lesson(
+        decision_id=dec_cloud_mig_id,
+        title="Database Migration Timeline Buffering",
+        takeaway="Legacy on-prem schema refactoring always requires extensive integration staging; schedule minimum 6 weeks for database parity verification.",
+        category="Technical"
+    )
+
+    db.add_all([ev1, ev2, alt1, alt2, out1, out2, out3, les1, les2, les3])
+
+    # -------------------------------------------------------------
+    # 5. Dead Ends & Anti-patterns
+    # -------------------------------------------------------------
     dead_end_supplier_c = DeadEnd(
         id=uuid.uuid4(),
-        topic="Supplier C - Precision Electronics & Resins",
-        attempted_solution="Awarded Supplier C exclusive supply contract for automated assembly components",
-        root_cause_of_failure="40% defect rate in automated assembly line due to uncalibrated tooling and lack of ISO 9001 certified QA processes.",
-        cost_of_failure="₹25 lakh + 3 weeks manufacturing downtime",
-        retry_conditions="Do NOT retry unless Supplier C provides ISO 9001 certification and a certified third-party QA audit report.",
+        topic="Low-Cost Electronics Sourcing (Supplier C)",
+        attempted_solution="Contracted Supplier C for high-volume passive capacitors based solely on 30% discount.",
+        root_cause_of_failure="Severe batch defect rate (40%) triggered widespread recall and assembly stoppage.",
+        cost_of_failure="₹25 Lakhs + 3 weeks line stoppage",
+        retry_conditions="Supplier C passes ISO 9001 audit and guarantees 99.5% test yield under third-party certification.",
         do_not_retry=True,
         failure_date="2021-06",
-        department_id="Procurement",
-        created_at=now - timedelta(days=1100)
+        department_id="Procurement"
     )
 
     dead_end_pilot = DeadEnd(
         id=uuid.uuid4(),
-        topic="Warehouse Infrastructure Migration without Pilot",
-        attempted_solution="Full direct deployment of mission-critical sorting infrastructure across all hubs simultaneously",
-        root_cause_of_failure="Hardware and protocol synchronization failures under peak concurrency load (Project Phoenix).",
-        cost_of_failure="₹42 lakh",
-        retry_conditions="Do NOT retry under any circumstances. All operational infrastructure transitions must complete a 60-day isolated pilot.",
+        topic="Direct Nationwide Robotics Rollout Without Pilot",
+        attempted_solution="Full multi-warehouse deployment without staging in western DC.",
+        root_cause_of_failure="Firmware incompatible with legacy ERP database schema under load.",
+        cost_of_failure="₹42 Lakhs",
+        retry_conditions="Strict requirement: 90-day shadow pilot at lowest-throughput distribution center first.",
         do_not_retry=True,
-        failure_date="2023-03",
-        department_id="Operations",
-        created_at=now - timedelta(days=380)
+        failure_date="2023-11",
+        department_id="Operations"
     )
 
-    # 6. Department Dependencies (Cross-Department Connections Showcase)
+    # -------------------------------------------------------------
+    # 6. Cross-Department Dependencies
+    # -------------------------------------------------------------
     dep_sales_supply = DepartmentDependency(
         id=uuid.uuid4(),
         source_department="Sales",
-        target_department="Supply Chain",
-        title="Customer Order Commitment vs Finished Goods Inventory",
-        description="Sales commitments on bulk delivery must verify physical warehouse inventory before contract execution.",
-        current_metric="Current available finished goods inventory: 500 units",
-        constraint_limit="Maximum immediate commitment: 500 units without 3-week replenishment lead time",
-        conflict_condition="Order volume > 500 units without confirmed replenishment schedule",
+        target_department="Procurement",
+        title="Custom Hardware Commitments vs Sourcing Lead Times",
+        description="Promising expedited delivery on custom hardware requires at least 4 weeks supplier lead time.",
+        current_metric="Available buffer inventory: 350 units",
+        constraint_limit="Maximum commitment without sourcing notice: 350 units",
+        conflict_condition="Commitment > 350 units without 4-week notice",
         is_active=True,
-        created_at=now - timedelta(days=180)
+        created_at=now - timedelta(days=90)
     )
 
-    dep_sales_finance = DepartmentDependency(
-        id=uuid.uuid4(),
-        source_department="Sales",
-        target_department="Finance",
-        title="Commercial Discount Margin Floor Protection",
-        description="Any sales discount exceeding 15% directly erodes divisional EBITDA target below the 22% statutory threshold.",
-        current_metric="Divisional blended margin target: 24.5%",
-        constraint_limit="Minimum transaction margin: 20%",
-        conflict_condition="Discount > 15% for customers with tenure < 5 years",
-        is_active=True,
-        created_at=now - timedelta(days=180)
-    )
-
-    dep_ops_sales = DepartmentDependency(
-        id=uuid.uuid4(),
-        source_department="Operations",
-        target_department="Sales",
-        title="Fulfillment Lead-Time Commitments",
-        description="Sales commitments of <7 business day delivery require expedited logistics approval from Operations.",
-        current_metric="Standard logistics SLA: 12-14 business days",
-        constraint_limit="Minimum standard turnaround: 10 business days",
-        conflict_condition="Customer promised delivery in under 7 days",
-        is_active=True,
-        created_at=now - timedelta(days=180)
-    )
-
-    # Add all entities
-    db.add_all([
-        dec_supplier_b,
-        dec_supplier_a_old,
-        dec_project_phoenix,
-        dec_customer_y,
-        dead_end_supplier_c,
-        dead_end_pilot,
-        dep_sales_supply,
-        dep_sales_finance,
-        dep_ops_sales
-    ])
+    db.add_all([dead_end_supplier_c, dead_end_pilot, dep_sales_supply])
     db.commit()
 
-    logger.info("✅ Enterprise seed data successfully generated!")
-
+    logger.info("✅ Enterprise memory successfully seeded with departments, projects, decisions, outcomes, and lessons!")
