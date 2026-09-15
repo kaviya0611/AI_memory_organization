@@ -75,7 +75,7 @@ export default function Footer() {
               ))}
               <li>
                 <Link
-                  to="/demo"
+                  to="/pitch/demo"
                   className="text-[#FFC000] font-semibold hover:underline flex items-center space-x-1"
                 >
                   <span>Launch Live Mock Demo</span>

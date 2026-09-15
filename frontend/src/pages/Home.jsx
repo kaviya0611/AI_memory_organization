@@ -102,19 +102,27 @@ export default function Home() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-md mb-16"
         >
           <Link
-            to="/problem"
-            className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-base transition-all duration-200 flex items-center justify-center space-x-2 group hover:shadow-lg"
+            to="/pitch/problem"
+            className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-sm transition-all duration-200 flex items-center justify-center space-x-2 group hover:shadow-lg"
           >
             <span>See the Problem</span>
-            <ArrowRight className="w-5 h-5 text-blue-300 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 text-blue-300 group-hover:translate-x-1 transition-transform" />
           </Link>
 
           <Link
-            to="/demo"
-            className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#FFC000] hover:bg-[#ffcd33] text-[#071A45] font-extrabold text-base shadow-glow-gold hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 flex items-center justify-center space-x-2"
+            to="/pitch/demo"
+            className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#FFC000] hover:bg-[#ffcd33] text-[#071A45] font-extrabold text-sm shadow-glow-gold hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 flex items-center justify-center space-x-2"
           >
-            <PlayCircle className="w-5 h-5 fill-[#071A45] text-[#FFC000]" />
-            <span>Try the Live Demo</span>
+            <PlayCircle className="w-4 h-4 fill-[#071A45] text-[#FFC000]" />
+            <span>Interactive Pitch Demo</span>
+          </Link>
+
+          <Link
+            to="/"
+            className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#1C52C2] hover:bg-[#2563eb] text-white font-extrabold text-sm shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 border border-blue-400/40"
+          >
+            <Database className="w-4 h-4 text-[#FFC000]" />
+            <span>Open Working Platform 🚀</span>
           </Link>
         </motion.div>
 

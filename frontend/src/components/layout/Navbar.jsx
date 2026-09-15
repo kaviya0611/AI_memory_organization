@@ -3,15 +3,15 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Brain, Sparkles, ChevronRight, Menu, X, Database, PlayCircle } from 'lucide-react';
 
 export const NAV_LINKS = [
-  { path: '/', label: 'Home' },
-  { path: '/problem', label: 'Problem' },
-  { path: '/solution', label: 'Solution' },
-  { path: '/demo', label: 'Live Demo', isBadge: true },
-  { path: '/architecture', label: 'Architecture' },
-  { path: '/why-us', label: 'Why Us' },
-  { path: '/impact', label: 'Feasibility & Impact' },
-  { path: '/roadmap', label: 'Roadmap' },
-  { path: '/team', label: 'Team' },
+  { path: '/pitch', label: 'Home' },
+  { path: '/pitch/problem', label: 'Problem' },
+  { path: '/pitch/solution', label: 'Solution' },
+  { path: '/pitch/demo', label: 'Pitch Demo', isBadge: true },
+  { path: '/pitch/architecture', label: 'Architecture' },
+  { path: '/pitch/why-us', label: 'Why Us' },
+  { path: '/pitch/impact', label: 'Feasibility & Impact' },
+  { path: '/pitch/roadmap', label: 'Roadmap' },
+  { path: '/pitch/team', label: 'Team' },
 ];
 
 export default function Navbar({ onOpenConsole }) {
@@ -80,21 +80,20 @@ export default function Navbar({ onOpenConsole }) {
 
           {/* Action CTAs */}
           <div className="hidden lg:flex items-center space-x-3">
-            <button
-              onClick={onOpenConsole}
-              className="px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg border border-slate-700/60 transition flex items-center space-x-1.5"
-              title="Open the underlying backend database & council controls"
+            <Link
+              to="/"
+              className="px-4 py-2 text-xs font-bold text-white bg-[#1C52C2] hover:bg-[#2563eb] rounded-xl shadow transition flex items-center space-x-1.5 border border-blue-400/30"
             >
-              <Database className="w-3.5 h-3.5 text-blue-400" />
-              <span>Enterprise DB</span>
-            </button>
+              <Database className="w-3.5 h-3.5 text-[#FFC000]" />
+              <span>Launch Live Platform</span>
+            </Link>
 
             <Link
-              to="/demo"
+              to="/pitch/demo"
               className="px-4 py-2 text-sm font-bold text-[#071A45] bg-[#FFC000] hover:bg-[#ffcd33] rounded-xl shadow-glow-gold hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 flex items-center space-x-1.5"
             >
               <PlayCircle className="w-4 h-4 fill-[#071A45] text-[#FFC000]" />
-              <span>Interactive Demo</span>
+              <span>Pitch Demo</span>
             </Link>
           </div>
 

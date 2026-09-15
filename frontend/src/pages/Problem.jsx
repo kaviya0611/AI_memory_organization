@@ -208,7 +208,7 @@ export default function Problem() {
               How would an AI Organizational Brain prevent this?
             </p>
             <Link
-              to="/solution"
+              to="/pitch/solution"
               className="inline-flex items-center space-x-2 text-sm font-bold text-[#1C52C2] hover:text-[#071A45] transition-colors"
             >
               <span>Explore Our Solution</span>

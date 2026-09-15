@@ -316,7 +316,7 @@ export default function Solution() {
               Ready to see this in action live?
             </span>
             <Link
-              to="/demo"
+              to="/pitch/demo"
               className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-[#1C52C2] hover:bg-[#071A45] text-white font-bold text-sm shadow-md transition-all"
             >
               <span>Test The Live Demo</span>
